@@ -51,35 +51,37 @@ public class HFJavaSDKBasicExample {
 
 
     public static void main(String[] args) throws Exception {
-        // create fabric-ca client
-        System.out.println("start loading credentials");
-        HFCAClient caClient = getHfCaClient("http://localhost:17054", null);
-
-        // enroll or load admin
-        AppUser admin = getAdmin(caClient);
-        log.info(admin);
-
-        // register and enroll new user
-        AppUser appUser = getUser(caClient, admin, "hfuser2");
-        log.info(appUser);
-
-        // get HFC client instance
-        HFClient client = getHfClient();
-        // set user context
-        client.setUserContext(admin);
-
-        // get HFC channel using the client
-        Channel channel = getChannel(client);
-        log.info("Channel: " + channel.getName());
-
-
-        System.out.println("end loading credentials");
-
-
-        // call query blockchain example
-        queryBlockChain(client);
+        String response = getSoybeans(2);
+        System.out.println("Response: " + response);
     }
 
+
+    public static String  getSoybeans(long id) throws Exception {    
+    // create fabric-ca client
+    System.out.println("start loading credentials");
+    HFCAClient caClient = getHfCaClient("http://localhost:17054", null);
+
+    // enroll or load admin
+    AppUser admin = getAdmin(caClient);
+    log.info(admin);
+
+    // register and enroll new user
+    AppUser appUser = getUser(caClient, admin, "hfuser2");
+    log.info(appUser);
+
+    // get HFC client instance
+    HFClient client = getHfClient();
+    // set user context
+    client.setUserContext(admin);
+
+    // get HFC channel using the client
+    Channel channel = getChannel(client);
+    log.info("Channel: " + channel.getName());
+    System.out.println("end loading credentials");
+
+    // call query blockchain example
+    return queryBlockChain(client, ""+id);
+}
 
     /**
      * Invoke blockchain query
@@ -88,8 +90,10 @@ public class HFJavaSDKBasicExample {
      * @throws ProposalException
      * @throws InvalidArgumentException
      */
-    static void queryBlockChain(HFClient client) throws ProposalException, InvalidArgumentException {
+    static String queryBlockChain(HFClient client, String arg) throws ProposalException, InvalidArgumentException {
         // get channel instance from client
+        String response = "-";
+
         Channel channel = client.getChannel("mychannel");
         // create chaincode request
         QueryByChaincodeRequest qpr = client.newQueryProposalRequest();
@@ -98,14 +102,16 @@ public class HFJavaSDKBasicExample {
         qpr.setChaincodeID(fabcarCCId);
         // CC function to be called
         qpr.setFcn("readSoybeans");
-        String[] args = {"2"};
+        String[] args = new String[1];
+        args[0] = arg;
         qpr.setArgs(args);
         Collection<ProposalResponse> res = channel.queryByChaincode(qpr);
         // display response
         for (ProposalResponse pres : res) {
-            String stringResponse = new String(pres.getChaincodeActionResponsePayload());
-            log.info(stringResponse);
+            response = new String(pres.getChaincodeActionResponsePayload());
+            log.info(response);
         }
+        return response;
     }
 
     /**
