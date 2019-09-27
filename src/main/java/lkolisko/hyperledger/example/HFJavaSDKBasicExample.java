@@ -17,7 +17,6 @@ import org.hyperledger.fabric.sdk.exception.TransactionException;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
 import org.hyperledger.fabric_ca.sdk.HFCAClient;
 import org.hyperledger.fabric_ca.sdk.RegistrationRequest;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -50,13 +49,15 @@ public class HFJavaSDKBasicExample {
     private static final Logger log = Logger.getLogger(HFJavaSDKBasicExample.class);
 
 
+
     public static void main(String[] args) throws Exception {
+        //String sb = "{ \"id\": \"4\",   \"farm\":  \"divino oeste limitada\",   \"harvest_date\": \"2018-11-30\",   \"type\": \"organic\",   \"OperatorID\": 1 }";
         String response = getSoybeans(2);
         System.out.println("Response: " + response);
     }
 
 
-    public static String  getSoybeans(long id) throws Exception {    
+    public static String   getSoybeans(long id) throws Exception {    
     // create fabric-ca client
     System.out.println("start loading credentials");
     HFCAClient caClient = getHfCaClient("http://localhost:17054", null);
@@ -66,7 +67,7 @@ public class HFJavaSDKBasicExample {
     log.info(admin);
 
     // register and enroll new user
-    AppUser appUser = getUser(caClient, admin, "hfuser2");
+    AppUser appUser = getUser(caClient, admin, "hfuser6");
     log.info(appUser);
 
     // get HFC client instance
@@ -80,8 +81,41 @@ public class HFJavaSDKBasicExample {
     System.out.println("end loading credentials");
 
     // call query blockchain example
-    return queryBlockChain(client, ""+id);
+    return  readSoybeans(client, ""+id);
+
 }
+
+
+
+
+public static String  createSoybeans(String id, String value) throws Exception {    
+    // create fabric-ca client
+    System.out.println("start loading credentials");
+    HFCAClient caClient = getHfCaClient("http://localhost:17054", null);
+
+    // enroll or load admin
+    AppUser admin = getAdmin(caClient);
+    log.info(admin);
+
+    // register and enroll new user
+    AppUser appUser = getUser(caClient, admin, "hfuser6");
+    log.info(appUser);
+
+    // get HFC client instance
+    HFClient client = getHfClient();
+    // set user context
+    client.setUserContext(admin);
+
+    // get HFC channel using the client
+    Channel channel = getChannel(client);
+    log.info("Channel: " + channel.getName());
+    System.out.println("end loading credentials");
+
+    // call query blockchain example
+    return createSoybeans(client, id, value);
+}
+
+
 
     /**
      * Invoke blockchain query
@@ -90,7 +124,7 @@ public class HFJavaSDKBasicExample {
      * @throws ProposalException
      * @throws InvalidArgumentException
      */
-    static String queryBlockChain(HFClient client, String arg) throws ProposalException, InvalidArgumentException {
+    static String readSoybeans(HFClient client, String arg) throws ProposalException, InvalidArgumentException {
         // get channel instance from client
         String response = "-";
 
@@ -113,6 +147,42 @@ public class HFJavaSDKBasicExample {
         }
         return response;
     }
+
+
+    /**
+     * Invoke blockchain query
+     *
+     * @param client The HF Client
+     * @throws ProposalException
+     * @throws InvalidArgumentException
+     */
+    static String createSoybeans(HFClient client, String id, String value) throws ProposalException, InvalidArgumentException {
+        // get channel instance from client
+        String response = "-";
+
+        Channel channel = client.getChannel("mychannel");
+        // create chaincode request
+        QueryByChaincodeRequest qpr = client.newQueryProposalRequest();
+        // build cc id providing the chaincode name. Version is omitted here.
+        ChaincodeID fabcarCCId = ChaincodeID.newBuilder().setName("bc16").build();
+        qpr.setChaincodeID(fabcarCCId);
+        // CC function to be called
+        qpr.setFcn("createSoybeans");
+        String[] args = new String[2];
+        args[0] = id;
+        args[1] = value;
+        qpr.setArgs(args);
+        Collection<ProposalResponse> res = channel.queryByChaincode(qpr);
+        // display response
+        for (ProposalResponse pres : res) {
+            response = new String(pres.getChaincodeActionResponsePayload());
+            log.info(response);
+        }
+        return response;
+    }
+
+
+
 
     /**
      * Initialize and get HF channel
