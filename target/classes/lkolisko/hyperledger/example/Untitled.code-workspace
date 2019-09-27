@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "/Users/percivallucena/bcc2/bc16-client"
+		},
+		{
+			"path": "/Users/percivallucena/bc16"
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "automatic"
+	}
+}

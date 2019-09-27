@@ -10,6 +10,7 @@ import org.hyperledger.fabric.sdk.Orderer;
 import org.hyperledger.fabric.sdk.Peer;
 import org.hyperledger.fabric.sdk.ProposalResponse;
 import org.hyperledger.fabric.sdk.QueryByChaincodeRequest;
+import org.hyperledger.fabric.sdk.TransactionProposalRequest;
 import org.hyperledger.fabric.sdk.exception.CryptoException;
 import org.hyperledger.fabric.sdk.exception.InvalidArgumentException;
 import org.hyperledger.fabric.sdk.exception.ProposalException;
@@ -24,8 +25,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * <h1>HFJavaSDKBasicExample</h1>
@@ -52,8 +56,9 @@ public class HFJavaSDKBasicExample {
 
     public static void main(String[] args) throws Exception {
         //String sb = "{ \"id\": \"4\",   \"farm\":  \"divino oeste limitada\",   \"harvest_date\": \"2018-11-30\",   \"type\": \"organic\",   \"OperatorID\": 1 }";
-        String response = getSoybeans(2);
-        System.out.println("Response: " + response);
+       //String response = getSoybeans(2);
+       createSoybeans("4", "fazenda 2", "2019-02-23");
+       //System.out.println("Response: " + response);
     }
 
 
@@ -88,7 +93,7 @@ public class HFJavaSDKBasicExample {
 
 
 
-public static String  createSoybeans(String id, String value) throws Exception {    
+public static String  createSoybeans(String id,  String farm, String date) throws Exception {    
     // create fabric-ca client
     System.out.println("start loading credentials");
     HFCAClient caClient = getHfCaClient("http://localhost:17054", null);
@@ -112,7 +117,7 @@ public static String  createSoybeans(String id, String value) throws Exception {
     System.out.println("end loading credentials");
 
     // call query blockchain example
-    return createSoybeans(client, id, value);
+    return createSoybeans(client, id, farm, date);
 }
 
 
@@ -126,26 +131,28 @@ public static String  createSoybeans(String id, String value) throws Exception {
      */
     static String readSoybeans(HFClient client, String arg) throws ProposalException, InvalidArgumentException {
         // get channel instance from client
-        String response = "-";
 
-        Channel channel = client.getChannel("mychannel");
-        // create chaincode request
-        QueryByChaincodeRequest qpr = client.newQueryProposalRequest();
-        // build cc id providing the chaincode name. Version is omitted here.
-        ChaincodeID fabcarCCId = ChaincodeID.newBuilder().setName("bc16").build();
-        qpr.setChaincodeID(fabcarCCId);
-        // CC function to be called
-        qpr.setFcn("readSoybeans");
-        String[] args = new String[1];
-        args[0] = arg;
-        qpr.setArgs(args);
-        Collection<ProposalResponse> res = channel.queryByChaincode(qpr);
-        // display response
-        for (ProposalResponse pres : res) {
-            response = new String(pres.getChaincodeActionResponsePayload());
-            log.info(response);
-        }
-        return response;
+   // get channel instance from client
+   String response = "-";
+
+   Channel channel = client.getChannel("mychannel");
+   // create chaincode request
+   QueryByChaincodeRequest qpr = client.newQueryProposalRequest();
+   // build cc id providing the chaincode name. Version is omitted here.
+   ChaincodeID fabcarCCId = ChaincodeID.newBuilder().setName("bc16").build();
+   qpr.setChaincodeID(fabcarCCId);
+   // CC function to be called
+   qpr.setFcn("readSoybeans");
+   String[] args = new String[1];
+   args[0] = arg;
+   qpr.setArgs(args);
+   Collection<ProposalResponse> res = channel.queryByChaincode(qpr);
+   // display response
+   for (ProposalResponse pres : res) {
+       response = new String(pres.getChaincodeActionResponsePayload());
+       log.info(response);
+   }
+   return response;
     }
 
 
@@ -156,29 +163,23 @@ public static String  createSoybeans(String id, String value) throws Exception {
      * @throws ProposalException
      * @throws InvalidArgumentException
      */
-    static String createSoybeans(HFClient client, String id, String value) throws ProposalException, InvalidArgumentException {
+    static String createSoybeans(HFClient client, String id, String farm, String date) throws ProposalException, InvalidArgumentException {
         // get channel instance from client
-        String response = "-";
-
         Channel channel = client.getChannel("mychannel");
         // create chaincode request
-        QueryByChaincodeRequest qpr = client.newQueryProposalRequest();
+        TransactionProposalRequest qpr = client.newTransactionProposalRequest();
+
         // build cc id providing the chaincode name. Version is omitted here.
         ChaincodeID fabcarCCId = ChaincodeID.newBuilder().setName("bc16").build();
         qpr.setChaincodeID(fabcarCCId);
+        
         // CC function to be called
         qpr.setFcn("createSoybeans");
-        String[] args = new String[2];
-        args[0] = id;
-        args[1] = value;
-        qpr.setArgs(args);
-        Collection<ProposalResponse> res = channel.queryByChaincode(qpr);
-        // display response
-        for (ProposalResponse pres : res) {
-            response = new String(pres.getChaincodeActionResponsePayload());
-            log.info(response);
-        }
-        return response;
+        qpr.setArgs(new String[]{id, farm, date});
+
+        Collection<ProposalResponse> responses = channel.sendTransactionProposal(qpr);
+       
+        return channel.sendTransaction(responses).toString();    
     }
 
 
