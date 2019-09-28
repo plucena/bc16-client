@@ -1,16 +1,36 @@
 package api;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.json.JSONObject;
 
 public class Soybeans {
 
+    @JsonProperty("id")
     private final long id;
+
+
+    @JsonProperty("farm")
     private final String farm;
+
+    @JsonProperty("harvestdate")
     private final String harvestdate;
 
+    public Soybeans() {
+        this.id =0;
+        this.farm = "";
+        this.harvestdate = "";
+    }
 
     public Soybeans(long id, String farm, String harvestdate) {
         this.id = id;
+        this.farm = farm;
+        this.harvestdate = harvestdate;
+    }
+
+
+    public Soybeans(String id, String farm, String harvestdate) {
+        this.id = Long.parseLong(id);
         this.farm = farm;
         this.harvestdate = harvestdate;
     }

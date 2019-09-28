@@ -32,8 +32,10 @@ public class SoybeansController {
 
     @PostMapping(path = "/soybeans", consumes = "application/json", produces = "application/json")
     public void addSoybeans(@RequestBody Soybeans soybeans) {
-
-        //try {soybeans = HFJavaSDKBasicExample.createSoybeans;} catch(Exception e){};
+        System.out.println("ws");
+        String sid = "" + soybeans.getId();
+        System.out.println(sid + ":" + soybeans.getFarm() + ":" +  soybeans.getHarvestdate());
+        try {HFJavaSDKBasicExample.createSoybeans(sid, soybeans.getFarm(), soybeans.getHarvestdate());} catch(Exception e){};
     }
 
 }   
