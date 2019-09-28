@@ -2,7 +2,8 @@ package api;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.boot.json.JsonParser;
 import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,10 +14,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
+@Api(value = "Soybeans")
 public class SoybeansController {
 
     private final AtomicLong counter = new AtomicLong();
 
+    @ApiOperation(value = "Retrieve Soybeans")
     @GetMapping("/soybeans/{id}")
     public Soybeans getSoybeans(@PathVariable Long id) {
 
@@ -29,7 +32,7 @@ public class SoybeansController {
         return newAsset;
     }
 
-
+    @ApiOperation(value = "Create Soybeans")
     @PostMapping(path = "/soybeans", consumes = "application/json", produces = "application/json")
     public void addSoybeans(@RequestBody Soybeans soybeans) {
         System.out.println("ws");
