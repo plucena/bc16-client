@@ -1,4 +1,4 @@
-package lkolisko.hyperledger.example;
+package client.hyperledger.example;
 
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric.sdk.User;

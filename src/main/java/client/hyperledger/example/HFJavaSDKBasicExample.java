@@ -1,4 +1,4 @@
-package lkolisko.hyperledger.example;
+package client.hyperledger.example;
 
 import org.apache.log4j.Logger;
 import org.hyperledger.fabric.sdk.ChaincodeID;
@@ -56,9 +56,9 @@ public class HFJavaSDKBasicExample {
 
     public static void main(String[] args) throws Exception {
         //String sb = "{ \"id\": \"4\",   \"farm\":  \"divino oeste limitada\",   \"harvest_date\": \"2018-11-30\",   \"type\": \"organic\",   \"OperatorID\": 1 }";
-       //String response = getSoybeans(2);
-       createSoybeans("4", "fazenda 2", "2019-02-23");
-       //System.out.println("Response: " + response);
+       String response = getSoybeans(7);
+       //createSoybeans("4", "fazenda 2", "2019-02-23");
+        System.out.println("Response: " + response);
     }
 
 
@@ -72,7 +72,7 @@ public class HFJavaSDKBasicExample {
     log.info(admin);
 
     // register and enroll new user
-    AppUser appUser = getUser(caClient, admin, "hfuser6");
+    AppUser appUser = getUser(caClient, admin, "hfuser7");
     log.info(appUser);
 
     // get HFC client instance
@@ -103,7 +103,7 @@ public static String  createSoybeans(String id,  String farm, String date) throw
     log.info(admin);
 
     // register and enroll new user
-    AppUser appUser = getUser(caClient, admin, "hfuser6");
+    AppUser appUser = getUser(caClient, admin, "hfuser7");
     log.info(appUser);
 
     // get HFC client instance
